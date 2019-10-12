@@ -7,10 +7,10 @@ from torch.nn import Parameter
 import math
 
 def cosine_sim(x1, x2, dim=1, eps=1e-8):
-    ip = torch.mm(x1, x2.t())
-    w1 = torch.norm(x1, 2, dim)
+    ip = torch.mm(x1, x2.t()) # what is x1[0],x1[1]...?
+    w1 = torch.norm(x1, 2, dim) 
     w2 = torch.norm(x2, 2, dim)
-    return ip / torch.ger(w1,w2).clamp(min=eps)
+    return ip / torch.ger(w1,w2).clamp(min=eps) # torch.ger: outer product
 
 class MarginCosineProduct(nn.Module):
     r"""Implement of large margin cosine distance: :
@@ -33,14 +33,14 @@ class MarginCosineProduct(nn.Module):
         #self.weight.data.uniform_(-stdv, stdv)
 
     def forward(self, input, label):
-        cosine = cosine_sim(input, self.weight)
+        cosine = cosine_sim(input, self.weight) # to find out that the cosine similarity between input[i] and self.weight[j]
         # cosine = F.linear(F.normalize(input), F.normalize(self.weight))
         # --------------------------- convert label to one-hot ---------------------------
         # https://discuss.pytorch.org/t/convert-int-into-one-hot-format/507
-        one_hot = torch.zeros_like(cosine)
+        one_hot = torch.zeros_like(cosine) 
         one_hot.scatter_(1, label.view(-1, 1), 1.0)
         # -------------torch.where(out_i = {x_i if condition_i else y_i) -------------
-        output = self.s * (cosine - one_hot * self.m)
+        output = self.s * (cosine - one_hot * self.m) # self.m是阈值，self.s是啥？
 
         return output
 
